@@ -15,7 +15,7 @@ def timedelta_total_seconds(timedelta):
     ) / 10 ** 6
 
 # Default connection parameters
-BZ_HOST='tcp.benzinga.com'
+BZ_HOST='tcp-v1-1.benzinga.com'
 BZ_PORT=11337
 BZ_PING_INTERVAL=5.0
 
