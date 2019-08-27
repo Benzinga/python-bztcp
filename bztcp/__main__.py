@@ -21,6 +21,8 @@ if __name__ == "__main__":
         print(
             'Title:', content.get('title', 'No title.'),
             '; Tickers:', content.get('tickers', []),
-            '; Channels:', content.get('channels', [])
+            '; Channels:', content.get('channels', []),
+            '; Authors:', content.get('authors', []),
         )
         # Other fields include 'content', 'updated'...
+
