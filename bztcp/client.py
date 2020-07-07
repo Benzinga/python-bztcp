@@ -15,7 +15,7 @@ def timedelta_total_seconds(timedelta):
     ) / 10 ** 6
 
 # Default connection parameters
-BZ_HOST='tcp-v1-1.benzinga.com'
+BZ_HOST='tcp-v1.benzinga.io'
 BZ_PORT=11337
 BZ_PING_INTERVAL=5.0
 
@@ -199,7 +199,9 @@ class Client(object):
                     raise BzException(*ERR_NOT_CONNECTED)
             except socket.timeout:
                 if timeout_tries > MAX_TIMEOUTS:
+                    timeout_tries = 0
                     raise BzException(*ERR_NOT_CONNECTED)
+                timeout_tries = timeout_tries + 1
                 continue
 
     # Gets the next content item in the message stream.
