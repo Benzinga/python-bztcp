@@ -19,7 +19,6 @@ BZ_HOST='tcp-v1.benzinga.io'
 BZ_PORT=11337
 BZ_PING_INTERVAL=5.0
 
-MAX_TIMEOUTS = 10
 
 # Protocol end-of-transmission signal.
 BZ_EOT = b'=BZEOT\r\n'
@@ -169,12 +168,10 @@ class Client(object):
         data = {
             'pingTime': datetime.datetime.now().isoformat()
         }
-
         self.send(Message(STATUS_PING, data))
 
     # Returns the next message, sending pings at the ping interval.
     def next_msg(self):
-        timeout_tries = 0
         while True:
             ping_delta = datetime.timedelta(seconds=BZ_PING_INTERVAL)
             now = datetime.datetime.now()
@@ -193,16 +190,15 @@ class Client(object):
             # Try to receive a message.
             try:
                 result = self.recv()
-                if result is not None and result != "":
-                    return self.recv()
+                if result is not None and getattr(result, "data", "") != "":
+                    result2 = self.recv()
+                    print(f"got result: {result2.data}")
+                    return result2
                 else:
                     raise BzException(*ERR_NOT_CONNECTED)
             except socket.timeout:
-                if timeout_tries > MAX_TIMEOUTS:
-                    timeout_tries = 0
-                    raise BzException(*ERR_NOT_CONNECTED)
-                timeout_tries = timeout_tries + 1
-                continue
+                return Message.from_bytes(STATUS_STREAM+b":{}"+BZ_EOT)
+                
 
     # Gets the next content item in the message stream.
     def next_content(self):
