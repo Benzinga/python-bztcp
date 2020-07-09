@@ -191,13 +191,12 @@ class Client(object):
             try:
                 result = self.recv()
                 if result is not None and getattr(result, "data", "") != "":
-                    result2 = self.recv()
-                    print(f"got result: {result2.data}")
-                    return result2
+                    #result2 = self.recv()
+                    return result
                 else:
                     raise BzException(*ERR_NOT_CONNECTED)
             except socket.timeout:
-                return Message.from_bytes(STATUS_STREAM+b":{}"+BZ_EOT)
+                continue
                 
 
     # Gets the next content item in the message stream.

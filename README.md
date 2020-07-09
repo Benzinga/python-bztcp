@@ -39,3 +39,23 @@ for content in client.content_items():
     title = content.get('title', None)
     print(title)
 ```
+
+If you want to get a more granular look at the connection status, 
+you can handle individual messages instead of just content items:
+
+```python
+from bztcp.client import Client, STATUS_STREAM
+import os
+
+client = Client(username='USERNAME', key='APIKEY')
+
+while True:
+    try:
+        msg = client.next_msg()
+        if msg.status == STATUS_STREAM:
+            print(f"Content item: {msg.data}")
+        else:
+            print(f"Status: {msg.status}")
+    except Exception as e:
+        print(f"Captured Exception: {e}")
+```
