@@ -119,7 +119,10 @@ class Client(object):
                 return Message.from_bytes(line + BZ_EOT)
 
             # Buffer more data if not.
-            buf = self._sock.recv(4096)
+            try:
+                buf = self._sock.recv(4096)
+            except ConnectionResetError:
+                return None
 
             if not buf:
                 return None
