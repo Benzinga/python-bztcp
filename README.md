@@ -41,7 +41,8 @@ for content in client.content_items():
 ```
 
 If you want to get a more granular look at the connection status, 
-you can handle individual messages instead of just content items:
+you can handle individual messages instead of just content items,
+as well as disconnect the stream on command:
 
 ```python
 from bztcp.client import Client, STATUS_STREAM
@@ -52,10 +53,15 @@ client = Client(username='USERNAME', key='APIKEY')
 while True:
     try:
         msg = client.next_msg()
+        
         if msg.status == STATUS_STREAM:
             print(f"Content item: {msg.data}")
         else:
             print(f"Status: {msg.status}")
-    except Exception as e:
-        print(f"Captured Exception: {e}")
+    except KeyboardInterrupt as ke:
+        print(f"Cancelled, disconnecting.")
+        client.disconnect()
+    except BzException as bze:
+        print(f"BZ Error: {bze}")
+        break
 ```

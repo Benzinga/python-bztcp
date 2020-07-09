@@ -105,6 +105,7 @@ class Client(object):
         self._nextping = datetime.datetime.now() + ping_delta
 
         # Connect and authenticate.
+        self.connected = False
         self.connect()
         self.authenticate()
 
@@ -137,6 +138,11 @@ class Client(object):
         self._buf = b''
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._sock.connect((self._host, self._port))
+        self.connected = True
+
+    def disconnect(self):
+        self._sock.close()
+        self.connected = False
 
     # Authenticates with the upstream server using credentials passed in.
     def authenticate(self):
@@ -172,7 +178,7 @@ class Client(object):
 
     # Returns the next message, sending pings at the ping interval.
     def next_msg(self):
-        while True:
+        while self.connected:
             ping_delta = datetime.timedelta(seconds=BZ_PING_INTERVAL)
             now = datetime.datetime.now()
 
@@ -191,22 +197,21 @@ class Client(object):
             try:
                 result = self.recv()
                 if result is not None and getattr(result, "data", "") != "":
-                    #result2 = self.recv()
                     return result
                 else:
                     raise BzException(*ERR_NOT_CONNECTED)
             except socket.timeout:
                 continue
-                
+        raise BzException(*ERR_NOT_CONNECTED)
 
     # Gets the next content item in the message stream.
     def next_content(self):
-        while True:
+        while self.connected:
             msg = self.next_msg()
             if msg.status == STATUS_STREAM:
                 return msg
 
     def content_items(self):
-        while True:
+        while self.connected:
             yield self.next_content().data
 
