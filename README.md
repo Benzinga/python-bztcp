@@ -17,6 +17,11 @@ module directly. In Python 3 and 2.7+:
 
     python -m bztcp USERNAME KEY
 
+To test the Python client with configurable retries, delay and backoff you can run
+the package's built-in demo by running the module directly. In Python 3 and 2.7+:
+
+    python -m bztcp USERNAME KEY RETRIES DELAY BACKOFF
+
 In Python 2.6 and under, you will need the following:
 
     python -m bztcp.__main__ USERNAME KEY
@@ -35,6 +40,18 @@ from __future__ import print_function
 from bztcp.client import Client
 
 client = Client(username='USERNAME', key='APIKEY')
+for content in client.content_items():
+    title = content.get('title', None)
+    print(title)
+```
+
+To get an idea of how to pass configurable retries, delay and backoff in the
+`bztcp.client.Client` class, here's a similar example using the above code snippet:  
+```python
+from __future__ import print_function
+from bztcp.client import Client
+
+client = Client(username='USERNAME', key='APIKEY', retries=5, delay=90, backoff=2)
 for content in client.content_items():
     title = content.get('title', None)
     print(title)

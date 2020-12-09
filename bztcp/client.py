@@ -5,7 +5,7 @@ from __future__ import (
 import socket
 import datetime
 import json
-
+from bztcp.retry import retry
 
 # Python 2.6 and below do not have timedelta.total_seconds.
 def timedelta_total_seconds(timedelta):
@@ -18,7 +18,6 @@ def timedelta_total_seconds(timedelta):
 BZ_HOST='tcp-v1.benzinga.io'
 BZ_PORT=11337
 BZ_PING_INTERVAL=5.0
-
 
 # Protocol end-of-transmission signal.
 BZ_EOT = b'=BZEOT\r\n'
@@ -88,7 +87,7 @@ class Message(object):
 
 # Client object for connecting to TCP services.
 class Client(object):
-    def __init__(self, username, key, host=None, port=None):
+    def __init__(self, username, key, host=None, port=None, retries=5, delay=90, backoff=2):
         # Default if unspecified.
         if host == None:
             host = BZ_HOST
@@ -103,6 +102,14 @@ class Client(object):
 
         ping_delta = datetime.timedelta(seconds=BZ_PING_INTERVAL)
         self._nextping = datetime.datetime.now() + ping_delta
+
+        # For timeout
+        self.counter = 0
+        self.retries = retries
+        self.delay = delay
+        self.backoff = backoff
+        if backoff == 0:
+            self.backoff = 1
 
         # Connect and authenticate.
         self.connected = False
@@ -137,8 +144,15 @@ class Client(object):
         self._sock.sendall(msg.to_bytes())
 
     # Connects to the server (possibly again.)
+    @retry(TimeoutError)
     def connect(self):
+        if self.counter == self.retries:
+            print('Python TCP Client exiting after {tries} retries'.format(tries=self.counter))
+            exit(0)
+
+        self.counter += 1
         self._buf = b''
+        # print('Connecting to TCP Client. Try No. {count}'.format(count=self.counter))
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._sock.connect((self._host, self._port))
         self.connected = True
