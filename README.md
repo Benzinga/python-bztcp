@@ -1,7 +1,7 @@
 # Python BzTCP
 This package provides a pure-Python implementation of the Benzinga TCP protcol.
 
-**->> Service Deprecated <--**
+**->> Service Deprecated <<-**
 
 # Features
 
